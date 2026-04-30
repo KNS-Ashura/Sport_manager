@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -24,10 +26,35 @@ class User
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $emailAdrress = null;
+    private ?string $emailAddress = null;
 
     #[ORM\Column(length: 255)]
     private ?string $status = null;
+
+    /**
+     * @var Collection<int, Tournament>
+     */
+    #[ORM\OneToMany(targetEntity: Tournament::class, mappedBy: 'organizer')]
+    private Collection $organizedTournaments;
+
+    /**
+     * @var Collection<int, Tournament>
+     */
+    #[ORM\OneToMany(targetEntity: Tournament::class, mappedBy: 'winner')]
+    private Collection $wonTournaments;
+
+    /**
+     * @var Collection<int, Registration>
+     */
+    #[ORM\OneToMany(targetEntity: Registration::class, mappedBy: 'player', orphanRemoval: true)]
+    private Collection $registrations;
+
+    public function __construct()
+    {
+        $this->organizedTournaments = new ArrayCollection();
+        $this->wonTournaments = new ArrayCollection();
+        $this->registrations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -70,14 +97,14 @@ class User
         return $this;
     }
 
-    public function getEmailAdrress(): ?string
+    public function getEmailAddress(): ?string
     {
-        return $this->emailAdrress;
+        return $this->emailAddress;
     }
 
-    public function setEmailAdrress(string $emailAdrress): static
+    public function setEmailAddress(string $emailAddress): static
     {
-        $this->emailAdrress = $emailAdrress;
+        $this->emailAddress = $emailAddress;
 
         return $this;
     }
@@ -90,6 +117,85 @@ class User
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tournament>
+     */
+    public function getOrganizedTournaments(): Collection
+    {
+        return $this->organizedTournaments;
+    }
+
+    public function addOrganizedTournament(Tournament $tournament): static
+    {
+        if (!$this->organizedTournaments->contains($tournament)) {
+            $this->organizedTournaments->add($tournament);
+            $tournament->setOrganizer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganizedTournament(Tournament $tournament): static
+    {
+        $this->organizedTournaments->removeElement($tournament);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tournament>
+     */
+    public function getWonTournaments(): Collection
+    {
+        return $this->wonTournaments;
+    }
+
+    public function addWonTournament(Tournament $tournament): static
+    {
+        if (!$this->wonTournaments->contains($tournament)) {
+            $this->wonTournaments->add($tournament);
+            $tournament->setWinner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWonTournament(Tournament $tournament): static
+    {
+        if ($this->wonTournaments->removeElement($tournament)) {
+            if ($tournament->getWinner() === $this) {
+                $tournament->setWinner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Registration>
+     */
+    public function getRegistrations(): Collection
+    {
+        return $this->registrations;
+    }
+
+    public function addRegistration(Registration $registration): static
+    {
+        if (!$this->registrations->contains($registration)) {
+            $this->registrations->add($registration);
+            $registration->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRegistration(Registration $registration): static
+    {
+        $this->registrations->removeElement($registration);
 
         return $this;
     }

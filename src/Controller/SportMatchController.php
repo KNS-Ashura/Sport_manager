@@ -12,11 +12,11 @@ use App\Repository\TournamentRepository;
 use App\Repository\UserRepository;
 use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class SportMatchController extends AbstractController
 {
@@ -30,7 +30,7 @@ final class SportMatchController extends AbstractController
     }
 
     #[Route('/api/tournaments/{id}/sport-matchs', name: 'api_sport_match_create', methods: ['POST'])]
-    public function create(Tournament $tournament, Request $request, UserRepository $userRepository, RegistrationRepository $registrationRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function create(Tournament $tournament, Request $request, UserRepository $userRepository, RegistrationRepository $registrationRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
         $payload = $this->getPayload($request);
         if ($payload === null) {
@@ -73,6 +73,15 @@ final class SportMatchController extends AbstractController
         $sportMatch->setScorePlayer1((int) ($payload['scorePlayer1'] ?? 0));
         $sportMatch->setScorePlayer2((int) ($payload['scorePlayer2'] ?? 0));
 
+        $errors = $validator->validate($sportMatch);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
+        }
+
         $entityManager->persist($sportMatch);
         $entityManager->flush();
 
@@ -95,7 +104,7 @@ final class SportMatchController extends AbstractController
     }
 
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_update', methods: ['PUT'])]
-    public function update(int $idTournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, TournamentRepository $tournamentRepository, EntityManagerInterface $entityManager, NotificationService $notificationService): JsonResponse
+    public function update(int $idTournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, TournamentRepository $tournamentRepository, EntityManagerInterface $entityManager, NotificationService $notificationService, ValidatorInterface $validator): JsonResponse
     {
         $tournament = $tournamentRepository->find($idTournament);
         if (!$tournament) {
@@ -166,6 +175,15 @@ final class SportMatchController extends AbstractController
         }
         if ($sportMatch->getScorePlayer1() !== null && $sportMatch->getScorePlayer2() !== null) {
             $sportMatch->setStatus('finished');
+        }
+
+        $errors = $validator->validate($sportMatch);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
         }
 
         $entityManager->flush();

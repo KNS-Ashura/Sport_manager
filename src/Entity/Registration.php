@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use App\Repository\RegistrationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RegistrationRepository::class)]
+#[UniqueEntity(fields: ['player', 'tournament'], message: 'Ce joueur est déjà inscrit à ce tournoi.')]
 class Registration
 {
     #[ORM\Id]
@@ -17,6 +20,7 @@ class Registration
     private ?\DateTime $registrationDate = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Choice(choices: ['pending', 'confirmed'], message: 'Le statut de l\'inscription est invalide.')]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'registrations')]

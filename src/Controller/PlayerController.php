@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class PlayerController extends AbstractController
 {
@@ -32,7 +33,7 @@ final class PlayerController extends AbstractController
     }
 
     #[Route('/register', name: 'api_player_register', methods: ['POST'])]
-    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
     {
         $payload = $this->getPayload($request);
         if ($payload === null) {
@@ -53,6 +54,15 @@ final class PlayerController extends AbstractController
         $user->setRoles(['ROLE_USER']);
         $user->setPassword($passwordHasher->hashPassword($user, (string) $payload['password']));
 
+        $errors = $validator->validate($user);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
+        }
+
         $entityManager->persist($user);
         $entityManager->flush();
 
@@ -60,7 +70,7 @@ final class PlayerController extends AbstractController
     }
 
     #[Route('/api/players/{id}', name: 'api_player_update', methods: ['PUT'])]
-    public function update(User $user, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    public function update(User $user, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Forbidden'], 403);
@@ -91,6 +101,15 @@ final class PlayerController extends AbstractController
         }
         if (array_key_exists('password', $payload)) {
             $user->setPassword($passwordHasher->hashPassword($user, (string) $payload['password']));
+        }
+
+        $errors = $validator->validate($user);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
         }
 
         $entityManager->flush();

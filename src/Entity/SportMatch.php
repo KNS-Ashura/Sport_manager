@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\SportMatchRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SportMatchRepository::class)]
 class SportMatch
@@ -17,12 +18,15 @@ class SportMatch
     private ?\DateTime $matchDate = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'Le score doit être positif ou nul.')]
     private ?int $scorePlayer1 = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'Le score doit être positif ou nul.')]
     private ?int $scorePlayer2 = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Choice(choices: ['pending', 'in_progress', 'finished'], message: 'Le statut est invalide.')]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'games')]

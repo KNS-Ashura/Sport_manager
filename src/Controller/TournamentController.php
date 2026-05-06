@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class TournamentController extends AbstractController
 {
@@ -31,7 +32,7 @@ final class TournamentController extends AbstractController
     }
 
     #[Route('/api/tournaments', name: 'api_tournament_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, ValidatorInterface $validator): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Forbidden'], 403);
@@ -76,6 +77,15 @@ final class TournamentController extends AbstractController
             $tournament->setWinner($winner);
         }
 
+        $errors = $validator->validate($tournament);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
+        }
+
         $entityManager->persist($tournament);
         $entityManager->flush();
 
@@ -83,7 +93,7 @@ final class TournamentController extends AbstractController
     }
 
     #[Route('/api/tournaments/{id}', name: 'api_tournament_update', methods: ['PUT'])]
-    public function update(Tournament $tournament, Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, RegistrationRepository $registrationRepository, NotificationService $notificationService): JsonResponse
+    public function update(Tournament $tournament, Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, RegistrationRepository $registrationRepository, NotificationService $notificationService, ValidatorInterface $validator): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Forbidden'], 403);
@@ -153,6 +163,15 @@ final class TournamentController extends AbstractController
                     $notificationService->sendTournamentWinnerNotification($tournament, $winner, $emails);
                 }
             }
+        }
+
+        $errors = $validator->validate($tournament);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
         }
 
         $entityManager->flush();

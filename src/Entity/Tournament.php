@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TournamentRepository::class)]
 class Tournament
@@ -17,24 +18,34 @@ class Tournament
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom du tournoi est obligatoire.')]
     private ?string $tournamentName = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'La date de début est obligatoire.')]
+    #[Assert\Type("\DateTimeInterface")]
     private ?\DateTime $startDate = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'La date de fin est obligatoire.')]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Assert\GreaterThanOrEqual(propertyPath: 'startDate', message: 'La date de fin doit être postérieure ou égale à la date de début.')]
     private ?\DateTime $endDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $location = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'La description est obligatoire.')]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le nombre de participants est obligatoire.')]
+    #[Assert\Positive(message: 'Le nombre de participants doit être supérieur à 0.')]
     private ?int $maxParticipants = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le sport est obligatoire.')]
     private ?string $sport = null;
 
     #[ORM\ManyToOne(inversedBy: 'organizedTournaments')]

@@ -83,6 +83,17 @@ class AppFixtures extends Fixture
         $match2->setStatus('pending');
         $manager->persist($match2);
 
+        // 6. Un match déjà terminé pour les stats
+        $match3 = new SportMatch();
+        $match3->setTournament($tournament);
+        $match3->setPlayer1($players[0]); // Joueur 1
+        $match3->setPlayer2($players[2]); // Joueur 3
+        $match3->setMatchDate(new \DateTime('-2 hours'));
+        $match3->setScorePlayer1(10);
+        $match3->setScorePlayer2(5);
+        $match3->setStatus('finished');
+        $manager->persist($match3);
+
         $manager->flush();
     }
 }

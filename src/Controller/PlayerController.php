@@ -34,15 +34,14 @@ final class PlayerController extends AbstractController
     #[Route('/register', name: 'api_player_register', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true);
-        if (!is_array($payload)) {
+        $payload = $this->getPayload($request);
+        if ($payload === null) {
             return $this->json(['error' => 'Invalid JSON body'], 400);
         }
 
-        foreach (['lastName', 'firstName', 'username', 'emailAddress', 'password'] as $requiredField) {
-            if (!array_key_exists($requiredField, $payload)) {
-                return $this->json(['error' => sprintf('Missing field: %s', $requiredField)], 400);
-            }
+        $missingField = $this->getMissingField($payload, ['lastName', 'firstName', 'username', 'emailAddress', 'password']);
+        if ($missingField !== null) {
+            return $this->json(['error' => sprintf('Missing field: %s', $missingField)], 400);
         }
 
         $user = new User();
@@ -61,18 +60,14 @@ final class PlayerController extends AbstractController
     }
 
     #[Route('/api/players/{id}', name: 'api_player_update', methods: ['PUT'])]
-    public function update(?User $user, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    public function update(User $user, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Forbidden'], 403);
         }
 
-        if (!$user) {
-            return $this->json(['error' => 'Player not found'], 404);
-        }
-
-        $payload = json_decode($request->getContent(), true);
-        if (!is_array($payload)) {
+        $payload = $this->getPayload($request);
+        if ($payload === null) {
             return $this->json(['error' => 'Invalid JSON body'], 400);
         }
 
@@ -104,14 +99,10 @@ final class PlayerController extends AbstractController
     }
 
     #[Route('/api/players/{id}', name: 'api_player_delete', methods: ['DELETE'])]
-    public function delete(?User $user, EntityManagerInterface $entityManager): JsonResponse
+    public function delete(User $user, EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Forbidden'], 403);
-        }
-
-        if (!$user) {
-            return $this->json(['error' => 'Player not found'], 404);
         }
 
         $entityManager->remove($user);
@@ -131,5 +122,23 @@ final class PlayerController extends AbstractController
             'status' => $user->getStatus(),
             'roles' => $user->getRoles(),
         ];
+    }
+
+    private function getPayload(Request $request): ?array
+    {
+        $payload = json_decode($request->getContent(), true);
+
+        return is_array($payload) ? $payload : null;
+    }
+
+    private function getMissingField(array $payload, array $requiredFields): ?string
+    {
+        foreach ($requiredFields as $requiredField) {
+            if (!array_key_exists($requiredField, $payload)) {
+                return $requiredField;
+            }
+        }
+
+        return null;
     }
 }

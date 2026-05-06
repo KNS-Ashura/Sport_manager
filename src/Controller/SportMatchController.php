@@ -29,8 +29,8 @@ final class SportMatchController extends AbstractController
     #[Route('/api/tournaments/{id}/sport-matchs', name: 'api_sport_match_create', methods: ['POST'])]
     public function create(Tournament $tournament, Request $request, UserRepository $userRepository, RegistrationRepository $registrationRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true);
-        if (!is_array($payload)) {
+        $payload = $this->getPayload($request);
+        if ($payload === null) {
             return $this->json(['error' => 'Invalid JSON body'], 400);
         }
 
@@ -56,23 +56,24 @@ final class SportMatchController extends AbstractController
             return $this->json(['error' => 'Both players must have confirmed registrations for this tournament'], 400);
         }
 
-        try {
-            $sportMatch = new SportMatch();
-            $sportMatch->setTournament($tournament);
-            $sportMatch->setPlayer1($player1);
-            $sportMatch->setPlayer2($player2);
-            $sportMatch->setMatchDate(new \DateTime((string) $payload['matchDate']));
-            $sportMatch->setStatus((string) ($payload['status'] ?? 'pending'));
-            $sportMatch->setScorePlayer1((int) ($payload['scorePlayer1'] ?? 0));
-            $sportMatch->setScorePlayer2((int) ($payload['scorePlayer2'] ?? 0));
-
-            $entityManager->persist($sportMatch);
-            $entityManager->flush();
-
-            return $this->json($this->serializeSportMatch($sportMatch), 201);
-        } catch (\Exception) {
-            return $this->json(['error' => 'Invalid data format'], 400);
+        $matchDate = $this->parseDate((string) $payload['matchDate']);
+        if ($matchDate === null) {
+            return $this->json(['error' => 'Invalid matchDate format'], 400);
         }
+
+        $sportMatch = new SportMatch();
+        $sportMatch->setTournament($tournament);
+        $sportMatch->setPlayer1($player1);
+        $sportMatch->setPlayer2($player2);
+        $sportMatch->setMatchDate($matchDate);
+        $sportMatch->setStatus((string) ($payload['status'] ?? 'pending'));
+        $sportMatch->setScorePlayer1((int) ($payload['scorePlayer1'] ?? 0));
+        $sportMatch->setScorePlayer2((int) ($payload['scorePlayer2'] ?? 0));
+
+        $entityManager->persist($sportMatch);
+        $entityManager->flush();
+
+        return $this->json($this->serializeSportMatch($sportMatch), 201);
     }
 
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_show', methods: ['GET'])]
@@ -94,8 +95,8 @@ final class SportMatchController extends AbstractController
             return $this->json(['error' => 'Sport match not found for this tournament'], 404);
         }
 
-        $payload = json_decode($request->getContent(), true);
-        if (!is_array($payload)) {
+        $payload = $this->getPayload($request);
+        if ($payload === null) {
             return $this->json(['error' => 'Invalid JSON body'], 400);
         }
 
@@ -134,11 +135,11 @@ final class SportMatchController extends AbstractController
             $sportMatch->setStatus((string) $payload['status']);
         }
         if ($isAdmin && array_key_exists('matchDate', $payload)) {
-            try {
-                $sportMatch->setMatchDate(new \DateTime((string) $payload['matchDate']));
-            } catch (\Exception) {
+            $matchDate = $this->parseDate((string) $payload['matchDate']);
+            if ($matchDate === null) {
                 return $this->json(['error' => 'Invalid matchDate format'], 400);
             }
+            $sportMatch->setMatchDate($matchDate);
         }
 
         if ($sportMatch->getScorePlayer1() !== 0 || $sportMatch->getScorePlayer2() !== 0) {
@@ -181,5 +182,21 @@ final class SportMatchController extends AbstractController
             'scorePlayer2' => $sportMatch->getScorePlayer2(),
             'status' => $sportMatch->getStatus(),
         ];
+    }
+
+    private function getPayload(Request $request): ?array
+    {
+        $payload = json_decode($request->getContent(), true);
+
+        return is_array($payload) ? $payload : null;
+    }
+
+    private function parseDate(string $value): ?\DateTime
+    {
+        try {
+            return new \DateTime($value);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

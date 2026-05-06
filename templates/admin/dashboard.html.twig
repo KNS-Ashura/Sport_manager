@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+<main style="max-width: 1000px; margin: 2rem auto; font-family: Arial, sans-serif;">
+    <h1>Administration</h1>
+
+    <nav style="display:flex; gap: 1rem; margin: 1rem 0 2rem;">
+        <a href="{{ path('admin_tournaments') }}">Tournois</a>
+        <a href="{{ path('admin_registrations') }}">Inscriptions</a>
+        <a href="{{ path('admin_matches') }}">Matchs</a>
+        <a href="{{ path('app_logout') }}">Logout</a>
+    </nav>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
+                <strong>{{ label|upper }}</strong> - {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <section style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Tournois</h3><p>{{ tournamentsCount }}</p></article>
+        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Inscriptions</h3><p>{{ registrationsCount }}</p></article>
+        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Matchs</h3><p>{{ matchesCount }}</p></article>
+        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Utilisateurs</h3><p>{{ usersCount }}</p></article>
+    </section>
+</main>
+{% endblock %}

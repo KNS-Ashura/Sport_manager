@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Inscriptions{% endblock %}
+
+{% block body %}
+<main style="max-width: 1100px; margin: 2rem auto; font-family: Arial, sans-serif;">
+    <h1>Gestion des inscriptions</h1>
+    <p><a href="{{ path('admin_dashboard') }}">Retour dashboard</a></p>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
+                <strong>{{ label|upper }}</strong> - {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <h2>Creer une inscription</h2>
+    <form method="post" action="{{ path('admin_registrations_create') }}" style="display:flex; gap:.5rem; margin-bottom:2rem;">
+        <select name="playerId" required>
+            <option value="">Joueur</option>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }} ({{ user.emailAddress }})</option>
+            {% endfor %}
+        </select>
+        <select name="tournamentId" required>
+            <option value="">Tournoi</option>
+            {% for tournament in tournaments %}
+                <option value="{{ tournament.id }}">{{ tournament.tournamentName }}</option>
+            {% endfor %}
+        </select>
+        <select name="status">
+            <option value="pending">pending</option>
+            <option value="confirmed">confirmed</option>
+        </select>
+        <button type="submit">Creer</button>
+    </form>
+
+    <h2>Liste</h2>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>ID</th><th>Joueur</th><th>Tournoi</th><th>Date</th><th>Statut</th><th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for registration in registrations %}
+            <tr>
+                <td>{{ registration.id }}</td>
+                <td>{{ registration.player ? registration.player.username : '-' }}</td>
+                <td>{{ registration.tournament ? registration.tournament.tournamentName : '-' }}</td>
+                <td>{{ registration.registrationDate ? registration.registrationDate|date('Y-m-d H:i') }}</td>
+                <td>
+                    <form method="post" action="{{ path('admin_registrations_status', {id: registration.id}) }}" style="display:flex; gap:.5rem;">
+                        <select name="status">
+                            <option value="pending" {{ registration.status == 'pending' ? 'selected' : '' }}>pending</option>
+                            <option value="confirmed" {{ registration.status == 'confirmed' ? 'selected' : '' }}>confirmed</option>
+                        </select>
+                        <button type="submit">Maj</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{{ path('admin_registrations_delete', {id: registration.id}) }}" onsubmit="return confirm('Supprimer cette inscription ?');">
+                        <button type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6">Aucune inscription.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</main>
+{% endblock %}

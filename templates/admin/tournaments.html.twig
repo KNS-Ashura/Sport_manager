@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Tournois{% endblock %}
+
+{% block body %}
+<main style="max-width: 1100px; margin: 2rem auto; font-family: Arial, sans-serif;">
+    <h1>Gestion des tournois</h1>
+    <p><a href="{{ path('admin_dashboard') }}">Retour dashboard</a></p>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
+                <strong>{{ label|upper }}</strong> - {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <h2>Creer un tournoi</h2>
+    <form method="post" action="{{ path('admin_tournaments_create') }}" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem; margin-bottom:2rem;">
+        <input name="tournamentName" placeholder="Nom du tournoi" required>
+        <input name="sport" placeholder="Sport" required>
+        <input type="datetime-local" name="startDate" required>
+        <input type="datetime-local" name="endDate" required>
+        <input name="location" placeholder="Lieu">
+        <input type="number" name="maxParticipants" placeholder="Max participants" required>
+        <textarea name="description" placeholder="Description" required style="grid-column: 1 / span 2;"></textarea>
+        <select name="organizerId" required>
+            <option value="">Organisateur</option>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }} ({{ user.emailAddress }})</option>
+            {% endfor %}
+        </select>
+        <select name="winnerId">
+            <option value="">Vainqueur (optionnel)</option>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" style="grid-column: 1 / span 2;">Creer</button>
+    </form>
+
+    <h2>Liste</h2>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>ID</th><th>Nom</th><th>Sport</th><th>Debut</th><th>Fin</th><th>Organisateur</th><th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for tournament in tournaments %}
+            <tr>
+                <td>{{ tournament.id }}</td>
+                <td>{{ tournament.tournamentName }}</td>
+                <td>{{ tournament.sport }}</td>
+                <td>{{ tournament.startDate ? tournament.startDate|date('Y-m-d H:i') }}</td>
+                <td>{{ tournament.endDate ? tournament.endDate|date('Y-m-d H:i') }}</td>
+                <td>{{ tournament.organizer ? tournament.organizer.username : '-' }}</td>
+                <td>
+                    <form method="post" action="{{ path('admin_tournaments_delete', {id: tournament.id}) }}" onsubmit="return confirm('Supprimer ce tournoi ?');">
+                        <button type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">Aucun tournoi.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</main>
+{% endblock %}

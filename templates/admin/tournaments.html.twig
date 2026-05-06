@@ -56,9 +56,14 @@
                 <td>{{ tournament.endDate ? tournament.endDate|date('Y-m-d H:i') }}</td>
                 <td>{{ tournament.organizer ? tournament.organizer.username : '-' }}</td>
                 <td>
-                    <form method="post" action="{{ path('admin_tournaments_delete', {id: tournament.id}) }}" onsubmit="return confirm('Supprimer ce tournoi ?');">
-                        <button type="submit">Supprimer</button>
-                    </form>
+                    <div style="display:flex; gap:.5rem;">
+                        <a href="{{ path('admin_tournaments_edit', {id: tournament.id}) }}">
+                            <button type="button">Modifier</button>
+                        </a>
+                        <form method="post" action="{{ path('admin_tournaments_delete', {id: tournament.id}) }}" onsubmit="return confirm('Supprimer ce tournoi ?');">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
         {% else %}

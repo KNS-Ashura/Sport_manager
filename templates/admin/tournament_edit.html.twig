@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Tournoi{% endblock %}
+
+{% block body %}
+<main style="max-width: 1100px; margin: 2rem auto; font-family: Arial, sans-serif;">
+    <h1>Modifier le tournoi : {{ tournament.tournamentName }}</h1>
+    <p><a href="{{ path('admin_tournaments') }}">Retour à la liste</a></p>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
+                <strong>{{ label|upper }}</strong> - {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <form method="post" action="{{ path('admin_tournaments_update', {id: tournament.id}) }}" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem;">
+        <div>
+            <label>Nom du tournoi</label><br>
+            <input name="tournamentName" value="{{ tournament.tournamentName }}" required style="width:100%;">
+        </div>
+        <div>
+            <label>Sport</label><br>
+            <input name="sport" value="{{ tournament.sport }}" required style="width:100%;">
+        </div>
+        <div>
+            <label>Date de début</label><br>
+            <input type="datetime-local" name="startDate" value="{{ tournament.startDate ? tournament.startDate|date('Y-m-d\\TH:i') }}" required style="width:100%;">
+        </div>
+        <div>
+            <label>Date de fin</label><br>
+            <input type="datetime-local" name="endDate" value="{{ tournament.endDate ? tournament.endDate|date('Y-m-d\\TH:i') }}" required style="width:100%;">
+        </div>
+        <div>
+            <label>Lieu</label><br>
+            <input name="location" value="{{ tournament.location }}" style="width:100%;">
+        </div>
+        <div>
+            <label>Max participants</label><br>
+            <input type="number" name="maxParticipants" value="{{ tournament.maxParticipants }}" required style="width:100%;">
+        </div>
+        <div style="grid-column: 1 / span 2;">
+            <label>Description</label><br>
+            <textarea name="description" required style="width:100%; height:100px;">{{ tournament.description }}</textarea>
+        </div>
+        <div>
+            <label>Organisateur</label><br>
+            <select name="organizerId" required style="width:100%;">
+                {% for user in users %}
+                    <option value="{{ user.id }}" {{ tournament.organizer and tournament.organizer.id == user.id ? 'selected' : '' }}>
+                        {{ user.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Vainqueur</label><br>
+            <select name="winnerId" style="width:100%;">
+                <option value="">-</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {{ tournament.winner and tournament.winner.id == user.id ? 'selected' : '' }}>
+                        {{ user.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" style="grid-column: 1 / span 2; padding: 1rem; margin-top: 1rem;">Mettre à jour</button>
+    </form>
+</main>
+{% endblock %}

@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/admin')]
 #[IsGranted('ROLE_ADMIN')]
@@ -42,7 +43,7 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/tournaments/create', name: 'admin_tournaments_create', methods: ['POST'])]
-    public function createTournament(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): RedirectResponse
+    public function createTournament(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): RedirectResponse
     {
         try {
             $organizer = $userRepository->find((int) $request->request->get('organizerId'));
@@ -69,11 +70,74 @@ final class AdminController extends AbstractController
                 }
             }
 
+            $errors = $validator->validate($tournament);
+            if (count($errors) > 0) {
+                foreach ($errors as $error) {
+                    $this->addFlash('error', $error->getMessage());
+                }
+                return $this->redirectToRoute('admin_tournaments');
+            }
+
             $entityManager->persist($tournament);
             $entityManager->flush();
             $this->addFlash('success', 'Tournoi cree.');
-        } catch (\Throwable) {
-            $this->addFlash('error', 'Erreur lors de la creation du tournoi.');
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de la creation du tournoi : ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_tournaments');
+    }
+
+    #[Route('/tournaments/{id}/edit', name: 'admin_tournaments_edit', methods: ['GET'])]
+    public function editTournament(Tournament $tournament, UserRepository $userRepository): Response
+    {
+        return $this->render('admin/tournament_edit.html.twig', [
+            'tournament' => $tournament,
+            'users' => $userRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/tournaments/{id}/update', name: 'admin_tournaments_update', methods: ['POST'])]
+    public function updateTournament(Tournament $tournament, Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): RedirectResponse
+    {
+        try {
+            $organizer = $userRepository->find((int) $request->request->get('organizerId'));
+            if (!$organizer) {
+                $this->addFlash('error', 'Organizer introuvable.');
+                return $this->redirectToRoute('admin_tournaments_edit', ['id' => $tournament->getId()]);
+            }
+
+            $tournament->setTournamentName((string) $request->request->get('tournamentName'));
+            $tournament->setStartDate(new \DateTime((string) $request->request->get('startDate')));
+            $tournament->setEndDate(new \DateTime((string) $request->request->get('endDate')));
+            $tournament->setDescription((string) $request->request->get('description'));
+            $tournament->setLocation($request->request->get('location') ?: null);
+            $tournament->setMaxParticipants((int) $request->request->get('maxParticipants'));
+            $tournament->setSport((string) $request->request->get('sport'));
+            $tournament->setOrganizer($organizer);
+
+            $winnerId = $request->request->get('winnerId');
+            if ($winnerId) {
+                $winner = $userRepository->find((int) $winnerId);
+                if ($winner) {
+                    $tournament->setWinner($winner);
+                }
+            } else {
+                $tournament->setWinner(null);
+            }
+
+            $errors = $validator->validate($tournament);
+            if (count($errors) > 0) {
+                foreach ($errors as $error) {
+                    $this->addFlash('error', $error->getMessage());
+                }
+                return $this->redirectToRoute('admin_tournaments_edit', ['id' => $tournament->getId()]);
+            }
+
+            $entityManager->flush();
+            $this->addFlash('success', 'Tournoi mis a jour.');
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de la mise a jour : ' . $e->getMessage());
         }
 
         return $this->redirectToRoute('admin_tournaments');
@@ -130,9 +194,18 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/registrations/{id}/status', name: 'admin_registrations_status', methods: ['POST'])]
-    public function updateRegistrationStatus(Registration $registration, Request $request, EntityManagerInterface $entityManager): RedirectResponse
+    public function updateRegistrationStatus(Registration $registration, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): RedirectResponse
     {
         $registration->setStatus((string) $request->request->get('status', 'pending'));
+        
+        $errors = $validator->validate($registration);
+        if (count($errors) > 0) {
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
+            return $this->redirectToRoute('admin_registrations');
+        }
+
         $entityManager->flush();
         $this->addFlash('success', 'Statut inscription mis a jour.');
 
@@ -160,7 +233,7 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/matches/create', name: 'admin_matches_create', methods: ['POST'])]
-    public function createMatch(Request $request, TournamentRepository $tournamentRepository, UserRepository $userRepository, RegistrationRepository $registrationRepository, EntityManagerInterface $entityManager): RedirectResponse
+    public function createMatch(Request $request, TournamentRepository $tournamentRepository, UserRepository $userRepository, RegistrationRepository $registrationRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): RedirectResponse
     {
         try {
             $tournament = $tournamentRepository->find((int) $request->request->get('tournamentId'));
@@ -188,6 +261,14 @@ final class AdminController extends AbstractController
             $match->setScorePlayer1((int) $request->request->get('scorePlayer1', 0));
             $match->setScorePlayer2((int) $request->request->get('scorePlayer2', 0));
 
+            $errors = $validator->validate($match);
+            if (count($errors) > 0) {
+                foreach ($errors as $error) {
+                    $this->addFlash('error', $error->getMessage());
+                }
+                return $this->redirectToRoute('admin_matches');
+            }
+
             $entityManager->persist($match);
             $entityManager->flush();
             $this->addFlash('success', 'Match cree.');
@@ -199,11 +280,20 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/matches/{id}/update', name: 'admin_matches_update', methods: ['POST'])]
-    public function updateMatch(SportMatch $match, Request $request, EntityManagerInterface $entityManager): RedirectResponse
+    public function updateMatch(SportMatch $match, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): RedirectResponse
     {
         $match->setScorePlayer1((int) $request->request->get('scorePlayer1', 0));
         $match->setScorePlayer2((int) $request->request->get('scorePlayer2', 0));
         $match->setStatus((string) $request->request->get('status', 'pending'));
+        
+        $errors = $validator->validate($match);
+        if (count($errors) > 0) {
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
+            return $this->redirectToRoute('admin_matches');
+        }
+
         $entityManager->flush();
         $this->addFlash('success', 'Match mis a jour.');
 

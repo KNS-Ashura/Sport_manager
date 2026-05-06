@@ -1,91 +1,114 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Matchs{% endblock %}
+{% block title %}Admin Matchs - SportManager{% endblock %}
 
 {% block body %}
-<main style="max-width: 1200px; margin: 2rem auto; font-family: Arial, sans-serif;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h1>Gestion des matchs</h1>
-    <p><a href="{{ path('admin_dashboard') }}">Retour dashboard</a></p>
+    <a href="{{ path('admin_dashboard') }}" class="btn" style="background: #334155;">← Retour Dashboard</a>
+</div>
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
-                <strong>{{ label|upper }}</strong> - {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    <h2>Creer un match</h2>
-    <form method="post" action="{{ path('admin_matches_create') }}" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:.5rem; margin-bottom:2rem;">
-        <select name="tournamentId" required>
-            <option value="">Tournoi</option>
-            {% for tournament in tournaments %}
-                <option value="{{ tournament.id }}">{{ tournament.tournamentName }}</option>
-            {% endfor %}
-        </select>
-        <select name="player1Id" required>
-            <option value="">Joueur 1</option>
-            {% for user in users %}
-                <option value="{{ user.id }}">{{ user.username }}</option>
-            {% endfor %}
-        </select>
-        <select name="player2Id" required>
-            <option value="">Joueur 2</option>
-            {% for user in users %}
-                <option value="{{ user.id }}">{{ user.username }}</option>
-            {% endfor %}
-        </select>
-        <input type="datetime-local" name="matchDate" required>
-        <input type="number" name="scorePlayer1" placeholder="Score P1" value="0">
-        <input type="number" name="scorePlayer2" placeholder="Score P2" value="0">
-        <select name="status">
-            <option value="pending">pending</option>
-            <option value="in_progress">in_progress</option>
-            <option value="finished">finished</option>
-        </select>
-        <button type="submit">Creer</button>
+<div class="card" style="margin-bottom: 2rem;">
+    <h2>Organiser un match</h2>
+    <form method="post" action="{{ path('admin_matches_create') }}" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Tournoi</label>
+            <select name="tournamentId" required>
+                <option value="">Sélectionner un tournoi</option>
+                {% for tournament in tournaments %}
+                    <option value="{{ tournament.id }}">{{ tournament.tournamentName }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Joueur 1</label>
+            <select name="player1Id" required>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Joueur 2</label>
+            <select name="player2Id" required>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Date & Heure</label>
+            <input type="datetime-local" name="matchDate" required>
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Score P1</label>
+            <input type="number" name="scorePlayer1" value="0">
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Score P2</label>
+            <input type="number" name="scorePlayer2" value="0">
+        </div>
+        <div style="grid-column: 1 / span 2;">
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Statut</label>
+            <select name="status">
+                <option value="pending">En attente (pending)</option>
+                <option value="in_progress">En cours (in_progress)</option>
+                <option value="finished">Terminé (finished)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-accent" style="align-self: end;">Créer le match</button>
     </form>
+</div>
 
-    <h2>Liste</h2>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+<div class="card">
+    <h2>Liste des Matchs</h2>
+    <table>
         <thead>
-        <tr>
-            <th>ID</th><th>Tournoi</th><th>J1</th><th>J2</th><th>Date</th><th>Score</th><th>Statut</th><th>Actions</th>
-        </tr>
+            <tr>
+                <th>Tournoi</th>
+                <th>Joueurs</th>
+                <th>Date</th>
+                <th>Score & Statut</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        {% for match in matches %}
-            <tr>
-                <td>{{ match.id }}</td>
-                <td>{{ match.tournament ? match.tournament.tournamentName : '-' }}</td>
-                <td>{{ match.player1 ? match.player1.username : '-' }}</td>
-                <td>{{ match.player2 ? match.player2.username : '-' }}</td>
-                <td>{{ match.matchDate ? match.matchDate|date('Y-m-d H:i') }}</td>
-                <td>
-                    <form method="post" action="{{ path('admin_matches_update', {id: match.id}) }}" style="display:flex; gap:.5rem; align-items:center;">
-                        <input type="number" name="scorePlayer1" value="{{ match.scorePlayer1 }}" style="width:70px;">
-                        <span>-</span>
-                        <input type="number" name="scorePlayer2" value="{{ match.scorePlayer2 }}" style="width:70px;">
-                </td>
-                <td>
-                        <select name="status">
-                            <option value="pending" {{ match.status == 'pending' ? 'selected' : '' }}>pending</option>
-                            <option value="in_progress" {{ match.status == 'in_progress' ? 'selected' : '' }}>in_progress</option>
-                            <option value="finished" {{ match.status == 'finished' ? 'selected' : '' }}>finished</option>
-                        </select>
-                </td>
-                <td>
-                        <button type="submit">Maj</button>
-                    </form>
-                    <form method="post" action="{{ path('admin_matches_delete', {id: match.id}) }}" onsubmit="return confirm('Supprimer ce match ?');" style="margin-top:.5rem;">
-                        <button type="submit">Supprimer</button>
-                    </form>
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="8">Aucun match.</td></tr>
-        {% endfor %}
+            {% for match in matches %}
+                <tr>
+                    <td><span style="font-size: 0.8rem; color: var(--primary)">{{ match.tournament ? match.tournament.tournamentName : 'N/A' }}</span></td>
+                    <td>
+                        <div style="font-weight: 600;">{{ match.player1.username }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">vs</div>
+                        <div style="font-weight: 600;">{{ match.player2.username }}</div>
+                    </td>
+                    <td style="font-size: 0.9rem; color: var(--text-dim);">{{ match.matchDate|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <form method="post" action="{{ path('admin_matches_update', {id: match.id}) }}" style="display:flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="number" name="scorePlayer1" value="{{ match.scorePlayer1 }}" style="width: 50px; padding: 0.2rem; text-align: center;">
+                                <span style="color: var(--text-dim);">-</span>
+                                <input type="number" name="scorePlayer2" value="{{ match.scorePlayer2 }}" style="width: 50px; padding: 0.2rem; text-align: center;">
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select name="status" style="padding: 0.2rem; font-size: 0.8rem; flex: 1;">
+                                    <option value="pending" {{ match.status == 'pending' ? 'selected' : '' }}>En attente</option>
+                                    <option value="in_progress" {{ match.status == 'in_progress' ? 'selected' : '' }}>En cours</option>
+                                    <option value="finished" {{ match.status == 'finished' ? 'selected' : '' }}>Terminé</option>
+                                </select>
+                                <button type="submit" class="btn" style="padding: 0.2rem 0.6rem; font-size: 0.8rem; background: #475569;">OK</button>
+                            </div>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ path('admin_matches_delete', {id: match.id}) }}" onsubmit="return confirm('Supprimer ce match ?');">
+                            <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-dim);">Aucun match planifié.</td></tr>
+            {% endfor %}
         </tbody>
     </table>
-</main>
+</div>
 {% endblock %}

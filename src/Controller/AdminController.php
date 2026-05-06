@@ -18,6 +18,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ * Contrôleur gérant l'interface d'administration en Twig.
+ * Réservé aux utilisateurs possédant le ROLE_ADMIN.
+ */
 #[Route('/admin')]
 #[IsGranted('ROLE_ADMIN')]
 final class AdminController extends AbstractController

@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - SportManager{% endblock %}
+
+{% block body %}
+<div style="max-width: 500px; margin: 3rem auto;">
+    <div class="card">
+        <h1 style="text-align: center; margin-bottom: 1.5rem;">Créer un compte</h1>
+        <p style="text-align: center; color: var(--text-dim); margin-bottom: 2rem;">Rejoignez la communauté SportManager dès aujourd'hui.</p>
+
+        <form method="post" action="{{ path('api_player_register') }}">
+            {% if error is defined and error %}
+                <div class="flash flash-error">{{ error }}</div>
+            {% endif %}
+            
+            {% if errors is defined %}
+                {% for err in errors %}
+                    <div class="flash flash-error">{{ err }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Prénom</label>
+                    <input type="text" name="firstName" required placeholder="Jean">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Nom</label>
+                    <input type="text" name="lastName" required placeholder="Dupont">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Pseudo (Username)</label>
+                <input type="text" name="username" required placeholder="jean_d">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Email</label>
+                <input type="email" name="emailAddress" required placeholder="jean@exemple.com">
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Mot de passe</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('registration') }}">
+
+            <button class="btn" type="submit" style="width: 100%; padding: 0.8rem; font-size: 1rem;">
+                S'inscrire
+            </button>
+            
+            <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-dim);">
+                Déjà un compte ? <a href="{{ path('app_login') }}" style="color: var(--primary); text-decoration: none;">Se connecter</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

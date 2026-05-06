@@ -18,42 +18,46 @@ class NotificationService
     }
 
     /**
-     * Envoie une notification à tous les participants d'un tournoi lorsqu'il est remporté.
+     * Envoie un email à tous les participants confirmés pour annoncer le vainqueur du tournoi.
      */
-    public function sendTournamentWinnerNotification(Tournament $tournament, User $winner, array $participantsEmails): void
+    public function sendTournamentWinnerNotification(Tournament $tournament, User $winner, array $participantEmails): void
     {
-        if (empty($participantsEmails)) {
+        if (empty($participantEmails)) {
             return;
         }
 
+        // Création de l'email avec le composant Mime de Symfony
         $email = (new Email())
             ->from('noreply@sportmanager.com')
-            ->to(...$participantsEmails)
-            ->subject(sprintf('Fin du tournoi %s !', $tournament->getTournamentName()))
+            ->to(...$participantEmails) // Utilisation du spread operator pour envoyer à plusieurs destinataires
+            ->subject('Vainqueur annoncé pour le tournoi : ' . $tournament->getTournamentName())
             ->text(sprintf(
-                "Le tournoi '%s' est terminé.\n\nLe grand vainqueur est %s %s (%s) !\n\nMerci à tous pour votre participation.",
+                "Le tournoi %s est terminé !\nFélicitations à %s qui a remporté la victoire.",
                 $tournament->getTournamentName(),
-                $winner->getFirstName(),
-                $winner->getLastName(),
                 $winner->getUsername()
             ));
 
+        // Envoi via le transport configuré dans MAILER_DSN (Mailtrap)
         $this->mailer->send($email);
     }
 
     /**
-     * Envoie une notification à l'adversaire pour qu'il remplisse son score.
+     * Envoie un email de rappel à l'adversaire lorsqu'un joueur a mis à jour son score.
      */
-    public function sendScoreUpdateReminder(SportMatch $match, User $playerToRemind): void
+    public function sendScoreUpdateReminder(SportMatch $match, User $recipient): void
     {
+        if (!$recipient->getEmailAddress()) {
+            return;
+        }
+
         $email = (new Email())
-            ->from('noreply@sportmanager.com')
-            ->to($playerToRemind->getEmailAddress())
-            ->subject('Votre adversaire a mis à jour son score !')
+            ->from('notifications@sportmanager.com')
+            ->to($recipient->getEmailAddress())
+            ->subject('Mise à jour de score : ' . $match->getTournament()?->getTournamentName())
             ->text(sprintf(
-                "Bonjour %s,\n\nVotre adversaire dans le tournoi '%s' a mis à jour son score pour votre match.\nMerci de bien vouloir vous connecter et remplir le vôtre afin de valider le résultat du match.\n\nL'équipe Sport Manager",
-                $playerToRemind->getFirstName(),
-                $match->getTournament()->getTournamentName()
+                "Bonjour %s,\nTon adversaire a mis à jour son score pour votre match du tournoi %s. N'oublie pas de saisir ton score pour valider le match.",
+                $recipient->getUsername(),
+                $match->getTournament()?->getTournamentName()
             ));
 
         $this->mailer->send($email);

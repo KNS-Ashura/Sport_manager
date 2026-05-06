@@ -1,31 +1,42 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard - SportManager{% endblock %}
 
 {% block body %}
-<main style="max-width: 1000px; margin: 2rem auto; font-family: Arial, sans-serif;">
-    <h1>Administration</h1>
+<h1>🛠️ Interface d'Administration</h1>
+<p style="color: var(--text-dim);">Gérez l'ensemble des données de la plateforme depuis cet espace centralisé.</p>
 
-    <nav style="display:flex; gap: 1rem; margin: 1rem 0 2rem;">
-        <a href="{{ path('admin_tournaments') }}">Tournois</a>
-        <a href="{{ path('admin_registrations') }}">Inscriptions</a>
-        <a href="{{ path('admin_matches') }}">Matchs</a>
-        <a href="{{ path('app_logout') }}">Logout</a>
-    </nav>
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin: 2rem 0;">
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">{{ tournamentsCount }}</div>
+        <div style="color: var(--text-dim); margin-top: 0.5rem;">Tournois</div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent);">{{ registrationsCount }}</div>
+        <div style="color: var(--text-dim); margin-top: 0.5rem;">Inscriptions</div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: #fbbf24;">{{ matchesCount }}</div>
+        <div style="color: var(--text-dim); margin-top: 0.5rem;">Matchs</div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text);">{{ usersCount }}</div>
+        <div style="color: var(--text-dim); margin-top: 0.5rem;">Utilisateurs</div>
+    </div>
+</div>
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
-                <strong>{{ label|upper }}</strong> - {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    <section style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Tournois</h3><p>{{ tournamentsCount }}</p></article>
-        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Inscriptions</h3><p>{{ registrationsCount }}</p></article>
-        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Matchs</h3><p>{{ matchesCount }}</p></article>
-        <article style="padding: 1rem; border: 1px solid #ddd;"><h3>Utilisateurs</h3><p>{{ usersCount }}</p></article>
-    </section>
-</main>
+<div class="card">
+    <h2>⚡ Actions Rapides</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
+        <a href="{{ path('admin_tournaments') }}" class="btn" style="text-align: center; padding: 1.5rem;">
+            🏆 Gérer les Tournois
+        </a>
+        <a href="{{ path('admin_registrations') }}" class="btn btn-accent" style="text-align: center; padding: 1.5rem;">
+            📝 Valider les Inscriptions
+        </a>
+        <a href="{{ path('admin_matches') }}" class="btn" style="text-align: center; padding: 1.5rem; background: #475569;">
+            ⚽ Arbitrer les Matchs
+        </a>
+    </div>
+</div>
 {% endblock %}

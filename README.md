@@ -62,5 +62,5 @@ php bin/phpunit
 
 ## 👤 Utilisateurs par défaut (Fixtures)
 
-- **Admin** : `admin@sportmanager.com` / `password`
+- **Admin** : `admin@sportmanager.com`/ `password`
 - **Joueurs** : `joueur1@sportmanager.com`, `joueur2@sportmanager.com`, etc.

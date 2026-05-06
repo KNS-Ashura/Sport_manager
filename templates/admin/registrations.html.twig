@@ -1,74 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Inscriptions{% endblock %}
+{% block title %}Admin Inscriptions - SportManager{% endblock %}
 
 {% block body %}
-<main style="max-width: 1100px; margin: 2rem auto; font-family: Arial, sans-serif;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h1>Gestion des inscriptions</h1>
-    <p><a href="{{ path('admin_dashboard') }}">Retour dashboard</a></p>
+    <a href="{{ path('admin_dashboard') }}" class="btn" style="background: #334155;">← Retour Dashboard</a>
+</div>
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div style="padding: .75rem; margin-bottom: .5rem; border: 1px solid #ddd;">
-                <strong>{{ label|upper }}</strong> - {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    <h2>Creer une inscription</h2>
-    <form method="post" action="{{ path('admin_registrations_create') }}" style="display:flex; gap:.5rem; margin-bottom:2rem;">
-        <select name="playerId" required>
-            <option value="">Joueur</option>
-            {% for user in users %}
-                <option value="{{ user.id }}">{{ user.username }} ({{ user.emailAddress }})</option>
-            {% endfor %}
-        </select>
-        <select name="tournamentId" required>
-            <option value="">Tournoi</option>
-            {% for tournament in tournaments %}
-                <option value="{{ tournament.id }}">{{ tournament.tournamentName }}</option>
-            {% endfor %}
-        </select>
-        <select name="status">
-            <option value="pending">pending</option>
-            <option value="confirmed">confirmed</option>
-        </select>
-        <button type="submit">Creer</button>
+<div class="card" style="margin-bottom: 2rem;">
+    <h2>Ajouter une inscription manuelle</h2>
+    <form method="post" action="{{ path('admin_registrations_create') }}" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; align-items: end;">
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Joueur</label>
+            <select name="playerId" required>
+                <option value="">Sélectionner un joueur</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }} ({{ user.emailAddress }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Tournoi</label>
+            <select name="tournamentId" required>
+                <option value="">Sélectionner un tournoi</option>
+                {% for tournament in tournaments %}
+                    <option value="{{ tournament.id }}">{{ tournament.tournamentName }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Statut initial</label>
+            <select name="status">
+                <option value="pending">En attente (pending)</option>
+                <option value="confirmed">Confirmé (confirmed)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-accent">Créer l'inscription</button>
     </form>
+</div>
 
-    <h2>Liste</h2>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+<div class="card">
+    <h2>Liste des Inscriptions</h2>
+    <table>
         <thead>
-        <tr>
-            <th>ID</th><th>Joueur</th><th>Tournoi</th><th>Date</th><th>Statut</th><th>Actions</th>
-        </tr>
+            <tr>
+                <th>Joueur</th>
+                <th>Tournoi</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        {% for registration in registrations %}
-            <tr>
-                <td>{{ registration.id }}</td>
-                <td>{{ registration.player ? registration.player.username : '-' }}</td>
-                <td>{{ registration.tournament ? registration.tournament.tournamentName : '-' }}</td>
-                <td>{{ registration.registrationDate ? registration.registrationDate|date('Y-m-d H:i') }}</td>
-                <td>
-                    <form method="post" action="{{ path('admin_registrations_status', {id: registration.id}) }}" style="display:flex; gap:.5rem;">
-                        <select name="status">
-                            <option value="pending" {{ registration.status == 'pending' ? 'selected' : '' }}>pending</option>
-                            <option value="confirmed" {{ registration.status == 'confirmed' ? 'selected' : '' }}>confirmed</option>
-                        </select>
-                        <button type="submit">Maj</button>
-                    </form>
-                </td>
-                <td>
-                    <form method="post" action="{{ path('admin_registrations_delete', {id: registration.id}) }}" onsubmit="return confirm('Supprimer cette inscription ?');">
-                        <button type="submit">Supprimer</button>
-                    </form>
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="6">Aucune inscription.</td></tr>
-        {% endfor %}
+            {% for registration in registrations %}
+                <tr>
+                    <td><strong>{{ registration.player ? registration.player.username : 'Inconnu' }}</strong></td>
+                    <td>{{ registration.tournament ? registration.tournament.tournamentName : 'Inconnu' }}</td>
+                    <td style="color: var(--text-dim);">{{ registration.registrationDate|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <form method="post" action="{{ path('admin_registrations_status', {id: registration.id}) }}" style="display:flex; gap:0.5rem;">
+                            <select name="status" style="padding: 0.3rem; font-size: 0.85rem;">
+                                <option value="pending" {{ registration.status == 'pending' ? 'selected' : '' }}>En attente</option>
+                                <option value="confirmed" {{ registration.status == 'confirmed' ? 'selected' : '' }}>Confirmé</option>
+                            </select>
+                            <button type="submit" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; background: #475569;">MAJ</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ path('admin_registrations_delete', {id: registration.id}) }}" onsubmit="return confirm('Supprimer cette inscription ?');">
+                            <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-dim);">Aucune inscription trouvée.</td></tr>
+            {% endfor %}
         </tbody>
     </table>
-</main>
+</div>
 {% endblock %}

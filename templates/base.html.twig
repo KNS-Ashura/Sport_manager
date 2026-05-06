@@ -2,23 +2,168 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+        <title>{% block title %}Sport Manager{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🏆</text></svg>">
+        
+        {# Google Fonts #}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+        <style>
+            :root {
+                --primary: #6366f1;
+                --primary-hover: #4f46e5;
+                --bg: #0f172a;
+                --card-bg: #1e293b;
+                --text: #f8fafc;
+                --text-dim: #94a3b8;
+                --accent: #10b981;
+                --danger: #ef4444;
+                --glass: rgba(30, 41, 59, 0.7);
+            }
 
-        {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'Inter', sans-serif;
+                margin: 0;
+                min-height: 100vh;
+            }
+
+            h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+
+            nav {
+                background: var(--glass);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                padding: 1rem 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .logo {
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--primary);
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 2rem;
+            }
+
+            .nav-links a {
+                color: var(--text-dim);
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s;
+            }
+
+            .nav-links a:hover { color: var(--text); }
+
+            .container {
+                max-width: 1200px;
+                margin: 2rem auto;
+                padding: 0 1.5rem;
+            }
+
+            .btn {
+                background: var(--primary);
+                color: white;
+                padding: 0.6rem 1.2rem;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: inline-block;
+            }
+
+            .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+            .btn-accent { background: var(--accent); }
+            .btn-danger { background: var(--danger); }
+
+            .card {
+                background: var(--card-bg);
+                border: 1px solid rgba(255,255,255,0.05);
+                border-radius: 16px;
+                padding: 1.5rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+
+            .flash {
+                padding: 1rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+            }
+            .flash-success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent); color: #6ee7b7; }
+            .flash-error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: #fca5a5; }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 1rem;
+            }
+
+            th { text-align: left; color: var(--text-dim); padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+            input, select, textarea {
+                background: #0f172a;
+                border: 1px solid rgba(255,255,255,0.1);
+                color: white;
+                padding: 0.6rem;
+                border-radius: 6px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+        </style>
+
+        {% block stylesheets %}{% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <nav>
+            <a href="{{ path('app_home') }}" class="logo">🏆 SportManager</a>
+            <div class="nav-links">
+                {% if app.user %}
+                    <a href="{{ path('app_user_dashboard') }}">Dashboard</a>
+                    <a href="{{ path('app_user_tournaments') }}">Tournois</a>
+                    <a href="{{ path('app_user_matches') }}">Mes Matchs</a>
+                    <a href="{{ path('app_user_registrations') }}">Inscriptions</a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('admin_dashboard') }}" style="color: var(--accent)">Admin</a>
+                    {% endif %}
+                    <a href="{{ path('app_logout') }}" class="btn btn-danger" style="padding: 0.4rem 0.8rem">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="btn">Connexion</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <div class="container">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="flash flash-{{ label }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </div>
+
+        {% block javascripts %}{% endblock %}
     </body>
 </html>

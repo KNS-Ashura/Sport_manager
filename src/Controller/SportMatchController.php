@@ -103,6 +103,13 @@ final class SportMatchController extends AbstractController
         return $this->json($this->serializeSportMatch($sportMatch));
     }
 
+    /**
+     * Met à jour le score d'un match.
+     * Cette méthode contient la logique métier principale :
+     * 1. Vérification des droits (seul le participant ou l'admin peut modifier).
+     * 2. Envoi d'un rappel par mail à l'adversaire.
+     * 3. Mise à jour automatique du statut du match (fini si les deux scores sont là).
+     */
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_update', methods: ['PUT'])]
     public function update(int $idTournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, TournamentRepository $tournamentRepository, EntityManagerInterface $entityManager, NotificationService $notificationService, ValidatorInterface $validator): JsonResponse
     {
@@ -120,17 +127,15 @@ final class SportMatchController extends AbstractController
             return $this->json(['error' => 'Invalid JSON body'], 400);
         }
 
-        $isAdmin = $this->isGranted('ROLE_ADMIN');
         $currentUser = $this->getUser();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
 
-        if (!$isAdmin) {
-            if (!$currentUser instanceof User) {
-                return $this->json(['error' => 'Forbidden'], 403);
-            }
+        // Sécurité : Vérifier que le joueur ne modifie pas le score de son adversaire
+        if (!$isAdmin && $currentUser instanceof User) {
 
             $isPlayer1 = $sportMatch->getPlayer1()?->getId() === $currentUser->getId();
             $isPlayer2 = $sportMatch->getPlayer2()?->getId() === $currentUser->getId();
-            if (!$isPlayer1 && !$isPlayer2) {
+            if (!$isPlayer1 && (!$isPlayer2)) {
                 return $this->json(['error' => 'Only match participants or admins can update scores'], 403);
             }
 
@@ -140,6 +145,7 @@ final class SportMatchController extends AbstractController
             if ($isPlayer2 && array_key_exists('scorePlayer1', $payload)) {
                 return $this->json(['error' => 'Player 2 cannot update player 1 score'], 403);
             }
+            // Les métadonnées (date, statut forcé) sont réservées à l'admin
             if (array_key_exists('status', $payload) || array_key_exists('matchDate', $payload)) {
                 return $this->json(['error' => 'Only admins can update match metadata'], 403);
             }
@@ -168,11 +174,13 @@ final class SportMatchController extends AbstractController
             $sportMatch->setMatchDate($matchDate);
         }
 
+        // Logique de changement de statut automatique
         if ($sportMatch->getScorePlayer1() !== null || $sportMatch->getScorePlayer2() !== null) {
             if (!$isAdmin) {
                 $sportMatch->setStatus('in_progress');
             }
         }
+        // Si les deux scores sont présents, le match est considéré comme terminé
         if ($sportMatch->getScorePlayer1() !== null && $sportMatch->getScorePlayer2() !== null) {
             $sportMatch->setStatus('finished');
         }

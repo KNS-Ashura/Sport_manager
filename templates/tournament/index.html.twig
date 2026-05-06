@@ -1,20 +1,50 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello TournamentController!{% endblock %}
+{% block title %}Tournois Disponibles - SportManager{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="card">
+    <h1>🏆 Tournois Sportifs</h1>
+    <p style="color: var(--text-dim); margin-bottom: 2rem;">Inscrivez-vous aux tournois pour participer et grimper dans le classement.</p>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        {% for tournament in tournaments %}
+            <div class="card" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">{{ tournament.tournamentName }}</h3>
+                        <span style="background: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">{{ tournament.sport }}</span>
+                    </div>
+                    
+                    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;">{{ tournament.description }}</p>
+                    
+                    <div style="margin: 1.5rem 0; font-size: 0.85rem; display: grid; gap: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📅</span> 
+                            <span>{{ tournament.startDate|date('d/m/Y') }} - {{ tournament.endDate|date('d/m/Y') }}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📍</span> 
+                            <span>{{ tournament.location }}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>👥</span> 
+                            <span>Max: {{ tournament.maxParticipants }} participants</span>
+                        </div>
+                    </div>
+                </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Supinfo/2/2PHPD/Sport_manager/src/Controller/TournamentController.php</code></li>
-        <li>Your template at <code>C:/Supinfo/2/2PHPD/Sport_manager/templates/tournament/index.html.twig</code></li>
-    </ul>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; margin-top: 1rem;">
+                    <form action="{{ path('app_user_tournament_register', {id: tournament.id}) }}" method="POST">
+                        <button type="submit" class="btn btn-accent" style="width: 100%;">S'inscrire au tournoi</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <p style="color: var(--text-dim);">Aucun tournoi n'est organisé pour le moment.</p>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

@@ -11,6 +11,9 @@ final class HomeController extends AbstractController
     #[Route('/', name: 'app_home', methods: ['GET'])]
     public function index(): RedirectResponse
     {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_user_dashboard');
+        }
         return $this->redirectToRoute('app_login');
     }
 }

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -32,17 +33,35 @@ final class PlayerController extends AbstractController
         return $this->json($this->serializePlayer($user));
     }
 
-    #[Route('/register', name: 'api_player_register', methods: ['POST'])]
-    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
+    #[Route('/register', name: 'api_player_register_view', methods: ['GET'])]
+    public function registerView(): Response
     {
-        $payload = $this->getPayload($request);
-        if ($payload === null) {
-            return $this->json(['error' => 'Invalid JSON body'], 400);
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_user_dashboard');
         }
+        return $this->render('player/register.html.twig');
+    }
+
+    #[Route('/register', name: 'api_player_register', methods: ['POST'])]
+    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): Response
+    {
+        $isJson = $request->getContentTypeFormat() === 'json';
+
+        if (!$isJson && !$this->isCsrfTokenValid('registration', $request->request->get('_csrf_token'))) {
+            return $this->render('player/register.html.twig', ['error' => 'Jeton CSRF invalide.']);
+        }
+
+        $payload = $request->request->all();
+        if (empty($payload)) {
+            // Si c'est un appel JSON
+            $payload = json_decode($request->getContent(), true) ?? [];
+        }
+
+        $isJson = $request->getContentTypeFormat() === 'json';
 
         $missingField = $this->getMissingField($payload, ['lastName', 'firstName', 'username', 'emailAddress', 'password']);
         if ($missingField !== null) {
-            return $this->json(['error' => sprintf('Missing field: %s', $missingField)], 400);
+            return $isJson ? $this->json(['error' => sprintf('Missing field: %s', $missingField)], 400) : $this->render('player/register.html.twig', ['error' => sprintf('Missing field: %s', $missingField)]);
         }
 
         $user = new User();
@@ -50,7 +69,7 @@ final class PlayerController extends AbstractController
         $user->setFirstName((string) $payload['firstName']);
         $user->setUsername((string) $payload['username']);
         $user->setEmailAddress((string) $payload['emailAddress']);
-        $user->setStatus((string) ($payload['status'] ?? 'active'));
+        $user->setStatus('active');
         $user->setRoles(['ROLE_USER']);
         $user->setPassword($passwordHasher->hashPassword($user, (string) $payload['password']));
 
@@ -60,13 +79,18 @@ final class PlayerController extends AbstractController
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
-            return $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400);
+            return $isJson ? $this->json(['error' => 'Validation failed', 'details' => $errorMessages], 400) : $this->render('player/register.html.twig', ['errors' => $errorMessages]);
         }
 
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return $this->json($this->serializePlayer($user), 201);
+        if ($isJson) {
+            return $this->json($this->serializePlayer($user), 201);
+        }
+
+        $this->addFlash('success', 'Compte créé avec succès ! Connectez-vous.');
+        return $this->redirectToRoute('app_login');
     }
 
     #[Route('/api/players/{id}', name: 'api_player_update', methods: ['PUT'])]

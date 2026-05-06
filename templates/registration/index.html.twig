@@ -1,20 +1,61 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello RegistrationController!{% endblock %}
+{% block title %}Mes Inscriptions - SportManager{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="card">
+    <h1>📝 Mes Inscriptions</h1>
+    <p style="color: var(--text-dim); margin-bottom: 2rem;">Suivez le statut de vos demandes de participation aux différents tournois.</p>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Supinfo/2/2PHPD/Sport_manager/src/Controller/RegistrationController.php</code></li>
-        <li>Your template at <code>C:/Supinfo/2/2PHPD/Sport_manager/templates/registration/index.html.twig</code></li>
-    </ul>
+    {% if registrations is empty %}
+        <div style="text-align: center; padding: 3rem;">
+            <p style="color: var(--text-dim);">Vous n'êtes inscrit à aucun tournoi pour le moment.</p>
+            <a href="{{ path('app_user_tournaments') }}" class="btn" style="margin-top: 1rem;">Découvrir les tournois</a>
+        </div>
+    {% else %}
+        <div class="card" style="background: rgba(15, 23, 42, 0.5); padding: 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <th style="padding: 1.5rem; text-align: left;">Tournoi</th>
+                        <th style="padding: 1.5rem; text-align: left;">Sport</th>
+                        <th style="padding: 1.5rem; text-align: left;">Date Inscription</th>
+                        <th style="padding: 1.5rem; text-align: left;">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in registrations %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1.5rem;">
+                                <strong style="font-size: 1.1rem; color: var(--text);">{{ reg.tournament.tournamentName }}</strong>
+                            </td>
+                            <td style="padding: 1.5rem;">
+                                <span style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                    {{ reg.tournament.sport }}
+                                </span>
+                            </td>
+                            <td style="padding: 1.5rem; color: var(--text-dim);">
+                                {{ reg.registrationDate|date('d/m/Y') }}
+                            </td>
+                            <td style="padding: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    {% if reg.status == 'confirmed' %}
+                                        <span style="height: 8px; width: 8px; border-radius: 50%; background: var(--accent);"></span>
+                                        <span style="color: var(--accent); font-weight: 600;">Confirmé</span>
+                                    {% elseif reg.status == 'pending' %}
+                                        <span style="height: 8px; width: 8px; border-radius: 50%; background: #fbbf24;"></span>
+                                        <span style="color: #fbbf24; font-weight: 600;">En attente</span>
+                                    {% else %}
+                                        <span style="height: 8px; width: 8px; border-radius: 50%; background: var(--danger);"></span>
+                                        <span style="color: var(--danger); font-weight: 600;">Refusé</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

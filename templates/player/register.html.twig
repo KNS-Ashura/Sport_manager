@@ -3,10 +3,9 @@
 {% block title %}Inscription - SportManager{% endblock %}
 
 {% block body %}
-<div style="max-width: 500px; margin: 3rem auto;">
+<div style="max-width: 500px; margin: 0 auto;">
     <div class="card">
-        <h1 style="text-align: center; margin-bottom: 1.5rem;">Créer un compte</h1>
-        <p style="text-align: center; color: var(--text-dim); margin-bottom: 2rem;">Rejoignez la communauté SportManager dès aujourd'hui.</p>
+        <h1 style="text-align: center;">Créer un compte</h1>
 
         <form method="post" action="{{ path('api_player_register') }}">
             {% if error is defined and error %}
@@ -19,40 +18,40 @@
                 {% endfor %}
             {% endif %}
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div>
-                    <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Prénom</label>
-                    <input type="text" name="firstName" required placeholder="Jean">
+                    <label>Prénom</label>
+                    <input type="text" name="firstName" required>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Nom</label>
-                    <input type="text" name="lastName" required placeholder="Dupont">
+                    <label>Nom</label>
+                    <input type="text" name="lastName" required>
                 </div>
             </div>
 
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Pseudo (Username)</label>
-                <input type="text" name="username" required placeholder="jean_d">
+            <div>
+                <label>Nom d'utilisateur</label>
+                <input type="text" name="username" required>
             </div>
 
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Email</label>
-                <input type="email" name="emailAddress" required placeholder="jean@exemple.com">
+            <div>
+                <label>Email</label>
+                <input type="email" name="emailAddress" required>
             </div>
 
-            <div style="margin-bottom: 2rem;">
-                <label style="display: block; margin-bottom: 0.4rem; color: var(--text-dim);">Mot de passe</label>
-                <input type="password" name="password" required placeholder="••••••••">
+            <div>
+                <label>Mot de passe</label>
+                <input type="password" name="password" required>
             </div>
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('registration') }}">
 
-            <button class="btn" type="submit" style="width: 100%; padding: 0.8rem; font-size: 1rem;">
+            <button class="btn" type="submit" style="width: 100%; margin-top: 1rem;">
                 S'inscrire
             </button>
             
-            <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-dim);">
-                Déjà un compte ? <a href="{{ path('app_login') }}" style="color: var(--primary); text-decoration: none;">Se connecter</a>
+            <p style="text-align: center; margin-top: 1rem;">
+                Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a>
             </p>
         </form>
     </div>

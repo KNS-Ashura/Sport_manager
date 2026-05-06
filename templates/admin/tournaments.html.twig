@@ -1,104 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Tournois - SportManager{% endblock %}
+{% block title %}Gestion des Tournois - SportManager{% endblock %}
 
 {% block body %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h1>Gestion des tournois</h1>
-    <a href="{{ path('admin_dashboard') }}" class="btn" style="background: #334155;">← Retour Dashboard</a>
+    <h1>Gestion des Tournois</h1>
+    <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">Retour Admin</a>
 </div>
 
-<div class="card" style="margin-bottom: 2rem;">
-    <h2>Créer un nouveau tournoi</h2>
-    <form method="post" action="{{ path('admin_tournaments_create') }}" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.5rem;">
+<div class="card">
+    <h2>Nouveau Tournoi</h2>
+    <form method="post" action="{{ path('admin_tournaments_create') }}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Nom du tournoi</label>
-            <input name="tournamentName" placeholder="Ex: Tournoi d'été" required>
+            <label>Nom</label>
+            <input name="tournamentName" required>
         </div>
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Sport</label>
-            <input name="sport" placeholder="Ex: Football" required>
+            <label>Sport</label>
+            <input name="sport" required>
         </div>
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Date de début</label>
+            <label>Date Début</label>
             <input type="datetime-local" name="startDate" required>
         </div>
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Date de fin</label>
+            <label>Date Fin</label>
             <input type="datetime-local" name="endDate" required>
         </div>
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Lieu</label>
-            <input name="location" placeholder="Ex: Gymnase Municipal">
+            <label>Lieu</label>
+            <input name="location">
         </div>
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Max participants</label>
-            <input type="number" name="maxParticipants" placeholder="Ex: 16" required>
+            <label>Max participants</label>
+            <input type="number" name="maxParticipants" required>
         </div>
         <div style="grid-column: 1 / span 2;">
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Description</label>
-            <textarea name="description" placeholder="Détails du tournoi..." required style="height: 100px;"></textarea>
+            <label>Description</label>
+            <textarea name="description" required></textarea>
         </div>
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Organisateur</label>
+            <label>Organisateur</label>
             <select name="organizerId" required>
-                <option value="">Sélectionner un organisateur</option>
-                {% for user in users %}
-                    <option value="{{ user.id }}">{{ user.username }} ({{ user.emailAddress }})</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Vainqueur (optionnel)</label>
-            <select name="winnerId">
-                <option value="">- Non défini -</option>
                 {% for user in users %}
                     <option value="{{ user.id }}">{{ user.username }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn btn-accent" style="grid-column: 1 / span 2; padding: 1rem;">Créer le tournoi</button>
+        <button type="submit" class="btn" style="grid-column: 1 / span 2;">Créer le tournoi</button>
     </form>
 </div>
 
-<div class="card">
-    <h2>Liste des Tournois</h2>
-    <table>
-        <thead>
+<h2>Liste des tournois</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Sport</th>
+            <th>Lieu</th>
+            <th>Dates</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tournament in tournaments %}
             <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Sport</th>
-                <th>Dates</th>
-                <th>Lieu</th>
-                <th>Actions</th>
+                <td>{{ tournament.tournamentName }}</td>
+                <td>{{ tournament.sport }}</td>
+                <td>{{ tournament.location }}</td>
+                <td>{{ tournament.startDate|date('d/m/Y') }} - {{ tournament.endDate|date('d/m/Y') }}</td>
+                <td>
+                    <a href="{{ path('admin_tournaments_edit', {id: tournament.id}) }}">Modifier</a>
+                    <form action="{{ path('admin_tournaments_delete', {id: tournament.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Supprimer ce tournoi ?');">
+                        <button type="submit" style="color:red; background:none; border:none; cursor:pointer; padding:0;">Supprimer</button>
+                    </form>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            {% for tournament in tournaments %}
-                <tr>
-                    <td>#{{ tournament.id }}</td>
-                    <td><strong>{{ tournament.tournamentName }}</strong></td>
-                    <td><span style="background: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">{{ tournament.sport }}</span></td>
-                    <td style="font-size: 0.9rem; color: var(--text-dim);">
-                        {{ tournament.startDate|date('d/m/Y') }} → {{ tournament.endDate|date('d/m/Y') }}
-                    </td>
-                    <td>{{ tournament.location }}</td>
-                    <td>
-                        <div style="display:flex; gap:.5rem;">
-                            <a href="{{ path('admin_tournaments_edit', {id: tournament.id}) }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #475569;">
-                                Modifier
-                            </a>
-                            <form method="post" action="{{ path('admin_tournaments_delete', {id: tournament.id}) }}" onsubmit="return confirm('Supprimer ce tournoi ?');" style="display: inline;">
-                                <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Supprimer</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            {% else %}
-                <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-dim);">Aucun tournoi n'a été créé.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

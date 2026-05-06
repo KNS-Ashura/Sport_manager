@@ -3,48 +3,28 @@
 {% block title %}Tournois Disponibles - SportManager{% endblock %}
 
 {% block body %}
-<div class="card">
-    <h1>🏆 Tournois Sportifs</h1>
-    <p style="color: var(--text-dim); margin-bottom: 2rem;">Inscrivez-vous aux tournois pour participer et grimper dans le classement.</p>
+<h1>Tournois Disponibles</h1>
+<p>Inscrivez-vous aux tournois pour participer.</p>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-        {% for tournament in tournaments %}
-            <div class="card" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <h3 style="margin: 0;">{{ tournament.tournamentName }}</h3>
-                        <span style="background: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">{{ tournament.sport }}</span>
-                    </div>
-                    
-                    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;">{{ tournament.description }}</p>
-                    
-                    <div style="margin: 1.5rem 0; font-size: 0.85rem; display: grid; gap: 0.5rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span>📅</span> 
-                            <span>{{ tournament.startDate|date('d/m/Y') }} - {{ tournament.endDate|date('d/m/Y') }}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span>📍</span> 
-                            <span>{{ tournament.location }}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span>👥</span> 
-                            <span>Max: {{ tournament.maxParticipants }} participants</span>
-                        </div>
-                    </div>
-                </div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+    {% for tournament in tournaments %}
+        <div class="card">
+            <h3>{{ tournament.tournamentName }}</h3>
+            <p><strong>Sport :</strong> {{ tournament.sport }}</p>
+            <p>{{ tournament.description }}</p>
+            
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem;">
+                <li>Dates : {{ tournament.startDate|date('d/m/Y') }} - {{ tournament.endDate|date('d/m/Y') }}</li>
+                <li>Lieu : {{ tournament.location }}</li>
+                <li>Participants max : {{ tournament.maxParticipants }}</li>
+            </ul>
 
-                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; margin-top: 1rem;">
-                    <form action="{{ path('app_user_tournament_register', {id: tournament.id}) }}" method="POST">
-                        <button type="submit" class="btn btn-accent" style="width: 100%;">S'inscrire au tournoi</button>
-                    </form>
-                </div>
-            </div>
-        {% else %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-                <p style="color: var(--text-dim);">Aucun tournoi n'est organisé pour le moment.</p>
-            </div>
-        {% endfor %}
-    </div>
+            <form action="{{ path('app_user_tournament_register', {id: tournament.id}) }}" method="POST" style="margin-top: 1rem;">
+                <button type="submit" class="btn" style="width: 100%;">S'inscrire</button>
+            </form>
+        </div>
+    {% else %}
+        <p>Aucun tournoi disponible.</p>
+    {% endfor %}
 </div>
 {% endblock %}

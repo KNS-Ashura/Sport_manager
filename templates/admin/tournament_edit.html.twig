@@ -5,45 +5,45 @@
 {% block body %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h1>Modifier le tournoi</h1>
-    <a href="{{ path('admin_tournaments') }}" class="btn" style="background: #334155;">← Retour à la liste</a>
+    <a href="{{ path('admin_tournaments') }}" class="btn btn-secondary">Retour à la liste</a>
 </div>
 
 <div class="card">
-    <h2 style="margin-bottom: 2rem;">Paramètres de : {{ tournament.tournamentName }}</h2>
+    <h2>Paramètres : {{ tournament.tournamentName }}</h2>
     
     <form method="post" action="{{ path('admin_tournaments_update', {id: tournament.id}) }}" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
         <div style="grid-column: 1 / span 2;">
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Nom du tournoi</label>
+            <label>Nom du tournoi</label>
             <input name="tournamentName" value="{{ tournament.tournamentName }}" required>
         </div>
         
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Sport</label>
+            <label>Sport</label>
             <input name="sport" value="{{ tournament.sport }}" required>
         </div>
         
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Lieu</label>
+            <label>Lieu</label>
             <input name="location" value="{{ tournament.location }}">
         </div>
         
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Date de début</label>
+            <label>Date de début</label>
             <input type="datetime-local" name="startDate" value="{{ tournament.startDate ? tournament.startDate|date('Y-m-d\\TH:i') }}" required>
         </div>
         
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Date de fin</label>
+            <label>Date de fin</label>
             <input type="datetime-local" name="endDate" value="{{ tournament.endDate ? tournament.endDate|date('Y-m-d\\TH:i') }}" required>
         </div>
         
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Max participants</label>
+            <label>Max participants</label>
             <input type="number" name="maxParticipants" value="{{ tournament.maxParticipants }}" required>
         </div>
 
         <div>
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Vainqueur</label>
+            <label>Vainqueur</label>
             <select name="winnerId">
                 <option value="">- Non défini -</option>
                 {% for user in users %}
@@ -55,22 +55,22 @@
         </div>
         
         <div style="grid-column: 1 / span 2;">
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Description</label>
-            <textarea name="description" required style="height: 120px;">{{ tournament.description }}</textarea>
+            <label>Description</label>
+            <textarea name="description" required style="height: 100px;">{{ tournament.description }}</textarea>
         </div>
 
         <div style="grid-column: 1 / span 2;">
-            <label style="color: var(--text-dim); display: block; margin-bottom: 0.5rem;">Organisateur</label>
+            <label>Organisateur</label>
             <select name="organizerId" required>
                 {% for user in users %}
                     <option value="{{ user.id }}" {{ tournament.organizer and tournament.organizer.id == user.id ? 'selected' : '' }}>
-                        {{ user.username }} ({{ user.emailAddress }})
+                        {{ user.username }}
                     </option>
                 {% endfor %}
             </select>
         </div>
 
-        <button type="submit" class="btn btn-accent" style="grid-column: 1 / span 2; padding: 1rem; font-size: 1.1rem; margin-top: 1rem;">
+        <button type="submit" class="btn" style="grid-column: 1 / span 2; margin-top: 1rem;">
             Enregistrer les modifications
         </button>
     </form>

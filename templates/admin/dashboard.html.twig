@@ -1,42 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Dashboard - SportManager{% endblock %}
+{% block title %}Administration - SportManager{% endblock %}
 
 {% block body %}
-<h1>🛠️ Interface d'Administration</h1>
-<p style="color: var(--text-dim);">Gérez l'ensemble des données de la plateforme depuis cet espace centralisé.</p>
+<h1>Panel d'administration</h1>
 
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin: 2rem 0;">
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">{{ tournamentsCount }}</div>
-        <div style="color: var(--text-dim); margin-top: 0.5rem;">Tournois</div>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+    <div class="card">
+        <h2>Tournois</h2>
+        <p>Gérez les tournois sportifs, les lieux et les dates.</p>
+        <a href="{{ path('admin_tournaments') }}" class="btn">Gérer les tournois</a>
     </div>
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent);">{{ registrationsCount }}</div>
-        <div style="color: var(--text-dim); margin-top: 0.5rem;">Inscriptions</div>
-    </div>
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: 700; color: #fbbf24;">{{ matchesCount }}</div>
-        <div style="color: var(--text-dim); margin-top: 0.5rem;">Matchs</div>
-    </div>
-    <div class="card" style="text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text);">{{ usersCount }}</div>
-        <div style="color: var(--text-dim); margin-top: 0.5rem;">Utilisateurs</div>
-    </div>
-</div>
 
-<div class="card">
-    <h2>⚡ Actions Rapides</h2>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
-        <a href="{{ path('admin_tournaments') }}" class="btn" style="text-align: center; padding: 1.5rem;">
-            🏆 Gérer les Tournois
-        </a>
-        <a href="{{ path('admin_registrations') }}" class="btn btn-accent" style="text-align: center; padding: 1.5rem;">
-            📝 Valider les Inscriptions
-        </a>
-        <a href="{{ path('admin_matches') }}" class="btn" style="text-align: center; padding: 1.5rem; background: #475569;">
-            ⚽ Arbitrer les Matchs
-        </a>
+    <div class="card">
+        <h2>Inscriptions</h2>
+        <p>Validez ou refusez les demandes des joueurs.</p>
+        <a href="{{ path('admin_registrations') }}" class="btn">Gérer les inscriptions</a>
+    </div>
+
+    <div class="card">
+        <h2>Matchs</h2>
+        <p>Gérez la planification et les scores des matchs.</p>
+        <a href="{{ path('admin_matches') }}" class="btn">Gérer les matchs</a>
+    </div>
+
+    <div class="card">
+        <h2>Statistiques</h2>
+        <p>Accès aux statistiques globales du système.</p>
+        <button class="btn btn-secondary" disabled>Bientôt disponible</button>
     </div>
 </div>
 {% endblock %}

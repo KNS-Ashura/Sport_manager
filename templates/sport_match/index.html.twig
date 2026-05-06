@@ -3,48 +3,42 @@
 {% block title %}Mes Matchs - SportManager{% endblock %}
 
 {% block body %}
-<div class="card">
-    <h1>⚽ Mes Matchs</h1>
-    <p style="color: var(--text-dim); margin-bottom: 2rem;">Retrouvez ici tous vos matchs programmés et saisissez vos scores.</p>
+<h1>Mes Matchs</h1>
+<p>Retrouvez ici tous vos matchs et saisissez vos scores.</p>
 
-    {% if matches is empty %}
-        <p style="text-align: center; padding: 2rem; color: var(--text-dim);">Vous n'avez aucun match prévu pour le moment.</p>
-    {% else %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
-            {% for match in matches %}
-                <div class="card" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">{{ match.tournament.tournamentName }}</span>
-                        <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: {{ match.status == 'finished' ? 'var(--accent)' : 'var(--primary)' }}; font-weight: 700;">
-                            {{ match.status|upper }}
-                        </span>
+{% if matches is empty %}
+    <p>Vous n'avez aucun match prévu.</p>
+{% else %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+        {% for match in matches %}
+            <div class="card">
+                <p><strong>Tournoi :</strong> {{ match.tournament.tournamentName }}</p>
+                <p><strong>Statut :</strong> {{ match.status|upper }}</p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0; background: #eee; padding: 1rem;">
+                    <div style="text-align: center;">
+                        <div>{{ match.player1.username }}</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">{{ match.scorePlayer1 ?? '-' }}</div>
                     </div>
-                    
-                    <div style="display: flex; justify-content: space-around; align-items: center; margin: 1.5rem 0;">
-                        <div style="text-align: center;">
-                            <div style="font-weight: 700; font-family: 'Outfit', sans-serif;">{{ match.player1.username }}</div>
-                            <div style="font-size: 2rem; font-weight: 700;">{{ match.scorePlayer1 ?? '-' }}</div>
-                        </div>
-                        <div style="font-size: 1.2rem; color: var(--text-dim); font-weight: 300;">VS</div>
-                        <div style="text-align: center;">
-                            <div style="font-weight: 700; font-family: 'Outfit', sans-serif;">{{ match.player2.username }}</div>
-                            <div style="font-size: 2rem; font-weight: 700;">{{ match.scorePlayer2 ?? '-' }}</div>
-                        </div>
-                    </div>
-
-                    {% if match.status != 'finished' %}
-                        <form action="{{ path('app_user_match_score', {id: match.id}) }}" method="POST" style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
-                            <input type="number" name="score" placeholder="Mon score" required style="flex: 1; padding: 0.5rem;">
-                            <button type="submit" class="btn btn-accent" style="padding: 0.5rem 1rem;">Valider</button>
-                        </form>
-                    {% endif %}
-                    
-                    <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-dim); text-align: center;">
-                        📅 Prévu le : {{ match.matchDate|date('d/m/Y à H:i') }}
+                    <div>VS</div>
+                    <div style="text-align: center;">
+                        <div>{{ match.player2.username }}</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">{{ match.scorePlayer2 ?? '-' }}</div>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
+
+                {% if match.status != 'finished' %}
+                    <form action="{{ path('app_user_match_score', {id: match.id}) }}" method="POST" style="display: flex; gap: 0.5rem;">
+                        <input type="number" name="score" placeholder="Mon score" required>
+                        <button type="submit" class="btn">Valider</button>
+                    </form>
+                {% endif %}
+                
+                <p style="font-size: 0.8rem; color: #666; margin-top: 1rem;">
+                    Date : {{ match.matchDate|date('d/m/Y H:i') }}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 {% endblock %}

@@ -3,9 +3,9 @@
 {% block title %}Connexion - SportManager{% endblock %}
 
 {% block body %}
-<div style="max-width: 450px; margin: 4rem auto;">
+<div style="max-width: 400px; margin: 0 auto;">
     <div class="card">
-        <h1 style="text-align: center; margin-bottom: 2rem;">Connexion</h1>
+        <h1 style="text-align: center;">Connexion</h1>
 
         <form method="post">
             {% if error %}
@@ -13,35 +13,35 @@
             {% endif %}
 
             {% if app.user %}
-                <div style="margin-bottom: 1.5rem; text-align: center;">
-                    Vous êtes connecté en tant que <strong>{{ app.user.userIdentifier }}</strong>.
+                <div style="text-align: center;">
+                    Connecté en tant que {{ app.user.userIdentifier }}.
                     <br><br>
                     <a href="{{ path('app_logout') }}" class="btn btn-danger">Déconnexion</a>
                 </div>
             {% else %}
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="inputEmailAddress" style="display: block; margin-bottom: 0.5rem; color: var(--text-dim);">Email</label>
-                    <input type="email" value="{{ last_username }}" name="emailAddress" id="inputEmailAddress" autocomplete="email" required autofocus placeholder="email@exemple.com">
+                <div>
+                    <label>Email</label>
+                    <input type="email" value="{{ last_username }}" name="emailAddress" required autofocus>
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="inputPassword" style="display: block; margin-bottom: 0.5rem; color: var(--text-dim);">Mot de passe</label>
-                    <input type="password" name="password" id="inputPassword" autocomplete="current-password" required placeholder="••••••••">
+                <div>
+                    <label>Mot de passe</label>
+                    <input type="password" name="password" required>
                 </div>
 
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-                <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <div style="margin-bottom: 1rem;">
                     <input type="checkbox" name="_remember_me" id="_remember_me" style="width: auto;">
-                    <label for="_remember_me" style="font-size: 0.9rem; color: var(--text-dim);">Se souvenir de moi</label>
+                    <label for="_remember_me" style="display: inline;">Se souvenir de moi</label>
                 </div>
 
-                <button class="btn" type="submit" style="width: 100%; padding: 0.8rem; font-size: 1rem;">
+                <button class="btn" type="submit" style="width: 100%;">
                     Se connecter
                 </button>
                 
-                <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-dim);">
-                    Pas encore de compte ? <a href="{{ path('api_player_register_view') }}" style="color: var(--primary); text-decoration: none;">S'inscrire</a>
+                <p style="text-align: center; margin-top: 1rem;">
+                    Pas de compte ? <a href="{{ path('api_player_register_view') }}">S'inscrire</a>
                 </p>
             {% endif %}
         </form>

@@ -8,6 +8,7 @@ use App\Entity\Tournament;
 use App\Entity\User;
 use App\Repository\RegistrationRepository;
 use App\Repository\SportMatchRepository;
+use App\Repository\TournamentRepository;
 use App\Repository\UserRepository;
 use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -79,8 +80,12 @@ final class SportMatchController extends AbstractController
     }
 
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_show', methods: ['GET'])]
-    public function show(Tournament $tournament, int $idSportMatchs, SportMatchRepository $sportMatchRepository): JsonResponse
+    public function show(int $idTournament, int $idSportMatchs, SportMatchRepository $sportMatchRepository, TournamentRepository $tournamentRepository): JsonResponse
     {
+        $tournament = $tournamentRepository->find($idTournament);
+        if (!$tournament) {
+            return $this->json(['error' => 'Tournament not found'], 404);
+        }
         $sportMatch = $sportMatchRepository->find($idSportMatchs);
         if (!$sportMatch instanceof SportMatch || $sportMatch->getTournament()?->getId() !== $tournament->getId()) {
             return $this->json(['error' => 'Sport match not found for this tournament'], 404);
@@ -90,8 +95,12 @@ final class SportMatchController extends AbstractController
     }
 
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_update', methods: ['PUT'])]
-    public function update(Tournament $tournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, EntityManagerInterface $entityManager, NotificationService $notificationService): JsonResponse
+    public function update(int $idTournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, TournamentRepository $tournamentRepository, EntityManagerInterface $entityManager, NotificationService $notificationService): JsonResponse
     {
+        $tournament = $tournamentRepository->find($idTournament);
+        if (!$tournament) {
+            return $this->json(['error' => 'Tournament not found'], 404);
+        }
         $sportMatch = $sportMatchRepository->find($idSportMatchs);
         if (!$sportMatch instanceof SportMatch || $sportMatch->getTournament()?->getId() !== $tournament->getId()) {
             return $this->json(['error' => 'Sport match not found for this tournament'], 404);
@@ -165,8 +174,12 @@ final class SportMatchController extends AbstractController
     }
 
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_delete', methods: ['DELETE'])]
-    public function delete(Tournament $tournament, int $idSportMatchs, SportMatchRepository $sportMatchRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function delete(int $idTournament, int $idSportMatchs, SportMatchRepository $sportMatchRepository, TournamentRepository $tournamentRepository, EntityManagerInterface $entityManager): JsonResponse
     {
+        $tournament = $tournamentRepository->find($idTournament);
+        if (!$tournament) {
+            return $this->json(['error' => 'Tournament not found'], 404);
+        }
         $sportMatch = $sportMatchRepository->find($idSportMatchs);
         if (!$sportMatch instanceof SportMatch || $sportMatch->getTournament()?->getId() !== $tournament->getId()) {
             return $this->json(['error' => 'Sport match not found for this tournament'], 404);

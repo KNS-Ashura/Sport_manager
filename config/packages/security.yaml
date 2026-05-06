@@ -44,6 +44,7 @@ security:
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/api/players, methods: [PUT, DELETE], roles: ROLE_ADMIN }
+        - { path: ^/api/tournaments/\d+/sport-matchs, methods: [PUT], roles: ROLE_USER }
         - { path: ^/api/tournaments, methods: [POST, PUT, DELETE], roles: ROLE_ADMIN }
         - { path: ^/api, roles: ROLE_USER }
 

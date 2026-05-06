@@ -9,7 +9,9 @@ use App\Entity\User;
 use App\Repository\RegistrationRepository;
 use App\Repository\SportMatchRepository;
 use App\Repository\UserRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -88,7 +90,7 @@ final class SportMatchController extends AbstractController
     }
 
     #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_update', methods: ['PUT'])]
-    public function update(Tournament $tournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function update(Tournament $tournament, int $idSportMatchs, Request $request, SportMatchRepository $sportMatchRepository, EntityManagerInterface $entityManager, NotificationService $notificationService): JsonResponse
     {
         $sportMatch = $sportMatchRepository->find($idSportMatchs);
         if (!$sportMatch instanceof SportMatch || $sportMatch->getTournament()?->getId() !== $tournament->getId()) {
@@ -127,9 +129,15 @@ final class SportMatchController extends AbstractController
 
         if (array_key_exists('scorePlayer1', $payload)) {
             $sportMatch->setScorePlayer1((int) $payload['scorePlayer1']);
+            if (!$isAdmin && $sportMatch->getPlayer2()) {
+                $notificationService->sendScoreUpdateReminder($sportMatch, $sportMatch->getPlayer2());
+            }
         }
         if (array_key_exists('scorePlayer2', $payload)) {
             $sportMatch->setScorePlayer2((int) $payload['scorePlayer2']);
+            if (!$isAdmin && $sportMatch->getPlayer1()) {
+                $notificationService->sendScoreUpdateReminder($sportMatch, $sportMatch->getPlayer1());
+            }
         }
         if ($isAdmin && array_key_exists('status', $payload)) {
             $sportMatch->setStatus((string) $payload['status']);
@@ -142,12 +150,12 @@ final class SportMatchController extends AbstractController
             $sportMatch->setMatchDate($matchDate);
         }
 
-        if ($sportMatch->getScorePlayer1() !== 0 || $sportMatch->getScorePlayer2() !== 0) {
+        if ($sportMatch->getScorePlayer1() !== null || $sportMatch->getScorePlayer2() !== null) {
             if (!$isAdmin) {
                 $sportMatch->setStatus('in_progress');
             }
         }
-        if (array_key_exists('scorePlayer1', $payload) && array_key_exists('scorePlayer2', $payload)) {
+        if ($sportMatch->getScorePlayer1() !== null && $sportMatch->getScorePlayer2() !== null) {
             $sportMatch->setStatus('finished');
         }
 

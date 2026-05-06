@@ -6,6 +6,8 @@ use App\Entity\Tournament;
 use App\Entity\User;
 use App\Repository\TournamentRepository;
 use App\Repository\UserRepository;
+use App\Repository\RegistrationRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -81,7 +83,7 @@ final class TournamentController extends AbstractController
     }
 
     #[Route('/api/tournaments/{id}', name: 'api_tournament_update', methods: ['PUT'])]
-    public function update(Tournament $tournament, Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): JsonResponse
+    public function update(Tournament $tournament, Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, RegistrationRepository $registrationRepository, NotificationService $notificationService): JsonResponse
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Forbidden'], 403);
@@ -136,7 +138,20 @@ final class TournamentController extends AbstractController
                 if (!$winner instanceof User) {
                     return $this->json(['error' => 'Winner not found'], 404);
                 }
+                
+                $isNewWinner = $tournament->getWinner() !== $winner;
                 $tournament->setWinner($winner);
+                
+                if ($isNewWinner) {
+                    $registrations = $registrationRepository->findBy(['tournament' => $tournament, 'status' => 'confirmed']);
+                    $emails = [];
+                    foreach ($registrations as $registration) {
+                        if ($registration->getPlayer() && $registration->getPlayer()->getEmailAddress()) {
+                            $emails[] = $registration->getPlayer()->getEmailAddress();
+                        }
+                    }
+                    $notificationService->sendTournamentWinnerNotification($tournament, $winner, $emails);
+                }
             }
         }
 

@@ -225,4 +225,23 @@ class Tournament
 
         return $this;
     }
+
+    public function getStatus(): string
+    {
+        $now = new \DateTime();
+
+        if ($this->winner !== null) {
+            return 'finished';
+        }
+
+        if ($now < $this->startDate) {
+            return 'upcoming';
+        }
+
+        if ($now > $this->endDate) {
+            return 'finished';
+        }
+
+        return 'ongoing';
+    }
 }

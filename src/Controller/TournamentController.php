@@ -184,6 +184,7 @@ final class TournamentController extends AbstractController
             'description' => $tournament->getDescription(),
             'maxParticipants' => $tournament->getMaxParticipants(),
             'sport' => $tournament->getSport(),
+            'status' => $tournament->getStatus(),
             'organizerId' => $tournament->getOrganizer()?->getId(),
             'winnerId' => $tournament->getWinner()?->getId(),
         ];

@@ -9,6 +9,7 @@ use App\Repository\RegistrationRepository;
 use App\Repository\SportMatchRepository;
 use App\Repository\TournamentRepository;
 use App\Repository\UserRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -102,7 +103,7 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/tournaments/{id}/update', name: 'admin_tournaments_update', methods: ['POST'])]
-    public function updateTournament(Tournament $tournament, Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): RedirectResponse
+    public function updateTournament(Tournament $tournament, Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator, NotificationService $notificationService): RedirectResponse
     {
         try {
             $organizer = $userRepository->find((int) $request->request->get('organizerId'));
@@ -121,10 +122,15 @@ final class AdminController extends AbstractController
             $tournament->setOrganizer($organizer);
 
             $winnerId = $request->request->get('winnerId');
+            $oldWinner = $tournament->getWinner();
             if ($winnerId) {
                 $winner = $userRepository->find((int) $winnerId);
                 if ($winner) {
                     $tournament->setWinner($winner);
+                    // Notification si un nouveau vainqueur est désigné
+                    if (!$oldWinner || $oldWinner->getId() !== $winner->getId()) {
+                        $notificationService->sendTournamentWinnerNotification($tournament);
+                    }
                 }
             } else {
                 $tournament->setWinner(null);

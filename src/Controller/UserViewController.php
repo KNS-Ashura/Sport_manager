@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Service\NotificationService;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -134,10 +135,11 @@ final class UserViewController extends AbstractController
             $notificationService->sendScoreUpdateReminder($match, $opponent);
         }
 
-        // Logique auto-finish
+        // Logique auto-finish robuste
         if ($match->getScorePlayer1() !== null && $match->getScorePlayer2() !== null) {
             $match->setStatus('finished');
         } else {
+            // S'il manque au moins un score, le match est en cours
             $match->setStatus('in_progress');
         }
 

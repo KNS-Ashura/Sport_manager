@@ -2,7 +2,7 @@
 
 Projet Symfony pour la gestion de tournois et de matchs sportifs avec notifications par email.
 
-## 🚀 Fonctionnalités
+## Fonctionnalités
 
 - **Gestion des Tournois** : Création, édition, suppression via API et interface Admin Twig.
 - **Inscriptions** : Système d'inscription des joueurs aux tournois avec validation par l'admin.
@@ -13,7 +13,7 @@ Projet Symfony pour la gestion de tournois et de matchs sportifs avec notificati
 - **Statistiques** : Commande console personnalisée pour calculer les performances des joueurs.
 - **Validation Stricte** : Contraintes sur les dates, scores positifs, unicité des emails/pseudos.
 
-## 🛠️ Installation
+## Installation
 
 1. **Cloner le projet** :
    ```bash
@@ -43,7 +43,7 @@ Projet Symfony pour la gestion de tournois et de matchs sportifs avec notificati
    symfony server:start
    ```
 
-## 📊 Commandes Personnalisées
+## Commandes Personnalisées
 
 ### Statistiques de joueur
 Pour consulter les victoires/défaites d'un joueur :
@@ -51,7 +51,7 @@ Pour consulter les victoires/défaites d'un joueur :
 php bin/console app:player-stats <userId> [tournamentId]
 ```
 
-## 🧪 Tests
+## Tests
 
 Les tests unitaires et fonctionnels couvrent les règles métier critiques (droits de modification, validation des joueurs confirmés, auto-finish des matchs).
 
@@ -60,7 +60,7 @@ Lancer les tests :
 php bin/phpunit
 ```
 
-## 👤 Utilisateurs par défaut (Fixtures)
+## Utilisateurs par défaut (Fixtures)
 
 - **Admin** : `admin@sportmanager.com`/ `password`
 - **Joueurs** : `joueur1@sportmanager.com`, `joueur2@sportmanager.com`, etc.

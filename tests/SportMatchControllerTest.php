@@ -94,9 +94,14 @@ class SportMatchControllerTest extends WebTestCase
 
     public function testAutoFinishMatchWhenBothScoresSubmitted(): void
     {
-        // 1. Récupération des données depuis les fixtures
+        // 1. Récupération d'un match en attente
         $admin = $this->userRepository->findOneBy(['username' => 'admin']);
-        $match = $this->matchRepository->findAll()[1]; // Prendre un autre match
+        $match = $this->matchRepository->findOneBy(['status' => 'pending']);
+        
+        if (!$match) {
+            $this->markTestSkipped('Aucun match "pending" trouvé pour le test.');
+        }
+
         $tournamentId = $match->getTournament()->getId();
         $matchId = $match->getId();
 

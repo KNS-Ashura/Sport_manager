@@ -16,11 +16,11 @@ class SportMatch
     #[ORM\Column]
     private ?\DateTime $matchDate = null;
 
-    #[ORM\Column]
-    private int $scorePlayer1 = 0;
+    #[ORM\Column(nullable: true)]
+    private ?int $scorePlayer1 = null;
 
-    #[ORM\Column]
-    private int $scorePlayer2 = 0;
+    #[ORM\Column(nullable: true)]
+    private ?int $scorePlayer2 = null;
 
     #[ORM\Column(length: 255)]
     private ?string $status = null;
@@ -54,24 +54,24 @@ class SportMatch
         return $this;
     }
 
-    public function getScorePlayer1(): int
+    public function getScorePlayer1(): ?int
     {
         return $this->scorePlayer1;
     }
 
-    public function setScorePlayer1(int $scorePlayer1): static
+    public function setScorePlayer1(?int $scorePlayer1): static
     {
         $this->scorePlayer1 = $scorePlayer1;
 
         return $this;
     }
 
-    public function getScorePlayer2(): int
+    public function getScorePlayer2(): ?int
     {
         return $this->scorePlayer2;
     }
 
-    public function setScorePlayer2(int $scorePlayer2): static
+    public function setScorePlayer2(?int $scorePlayer2): static
     {
         $this->scorePlayer2 = $scorePlayer2;
 
